@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Fp.Collections
 {
+    [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}")]
     public sealed class FpLinkedList<T> : ILinkedList<T>, IEnumerable<T>
     {
         private int _first = -1;
@@ -13,7 +15,6 @@ namespace Fp.Collections
         private int _freeList = -1;
         private int _freeCount;
 
-        private int _capacity;
         private int _count;
 
         private LinkedListEntry[] _entries;
@@ -22,12 +23,12 @@ namespace Fp.Collections
 
         public FpLinkedList(int initialCapacity = 8)
         {
-            _capacity = Math.Max(initialCapacity, 1);
+            Capacity = Math.Max(initialCapacity, 1);
 
             _entries = new LinkedListEntry[initialCapacity];
         }
 
-        private bool IsFull => _count == _capacity;
+        private bool IsFull => _count == Capacity;
 
 #region IEnumerable Implementation
 
@@ -50,6 +51,7 @@ namespace Fp.Collections
 #region ILinkedList<T> Implementation
 
         public int Count => _count - _freeCount;
+        public int Capacity { get; private set; }
 
         public FpLinkedListNode<T> First => TryGetFirst(out FpLinkedListNode<T> node) ? node : FpLinkedListNode<T>.Invalid;
 
@@ -240,8 +242,8 @@ namespace Fp.Collections
                 return;
             }
 
-            _capacity *= 2;
-            Array.Resize(ref _entries, _capacity);
+            Capacity *= 2;
+            Array.Resize(ref _entries, Capacity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

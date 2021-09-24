@@ -5,6 +5,7 @@ namespace Fp.Collections
         FpLinkedListNode<T> First { get; }
         FpLinkedListNode<T> Last { get; }
         int Count { get; }
+        int Capacity { get; }
 
         FpLinkedListNode<T> AddFirst(T value);
         void AddFirst(T value, out FpLinkedListNode<T> node);
