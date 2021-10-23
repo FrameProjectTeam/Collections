@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-using Fp.Collections;
-
 using NUnit.Framework;
 
-namespace Fp.Collection.Unit
+namespace Fp.Collections.Tests
 {
     public class LinkedList
     {

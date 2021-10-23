@@ -43,11 +43,9 @@ namespace Fp.Collections
 
             public void SetBackward(InternalDictionary<TValue, TKey, TBackwardComparer, TForwardComparer> backward)
             {
-                /*
                 Assert.IsNotNull(backward);
                 Assert.IsTrue(Count == 0);
                 Assert.IsTrue(backward.Count == 0);
-                */
 
                 _bwdDictionary = backward;
             }

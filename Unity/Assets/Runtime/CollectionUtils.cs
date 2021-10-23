@@ -13,7 +13,7 @@ namespace Fp.Collections
         public static int Count<TEnumerator>(this TEnumerator enumerable)
             where TEnumerator : class, IEnumerable
         {
-            /*Assert.IsNotNull(enumerable);*/
+            Assert.IsNotNull(enumerable);
 
             switch (enumerable)
             {
@@ -45,7 +45,8 @@ namespace Fp.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetRandom<T>(this IReadOnlyList<T> list)
         {
-            /*Assert.IsNotNull(list);*/
+            Assert.IsNotNull(list);
+
             int count = list.Count;
 
             switch (count)
@@ -81,13 +82,11 @@ namespace Fp.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IList<T> Swap<T>(this IList<T> list, int firstIndex, int secondIndex)
         {
-            /*
             Assert.IsNotNull(list);
             Assert.IsTrue(firstIndex >= 0, $"{nameof(firstIndex)} >= 0, {firstIndex}");
             Assert.IsTrue(firstIndex < list.Count, $"{nameof(firstIndex)} < {nameof(list)}.{nameof(List<T>.Count)}, {firstIndex}, {list.Count}");
             Assert.IsTrue(secondIndex >= 0, $"{nameof(secondIndex)} >= 0, {secondIndex}");
             Assert.IsTrue(secondIndex < list.Count, $"{nameof(secondIndex)} <  {nameof(list)}.{nameof(List<T>.Count)}, {secondIndex}, {list.Count}");
-            */
 
             if (firstIndex == secondIndex)
             {
@@ -109,7 +108,6 @@ namespace Fp.Collections
         /// <typeparam name="T">List generic argument</typeparam>
         public static void Shuffle<T>(this IList<T> list, int offset, int count, Random random)
         {
-            /*
             Assert.IsNotNull(list);
             Assert.IsTrue(offset >= 0, $"{nameof(offset)} >= 0, {offset}");
             Assert.IsTrue(offset < list.Count,
@@ -117,8 +115,7 @@ namespace Fp.Collections
             Assert.IsTrue(count >= 0, $"{nameof(count)} > 0");
             Assert.IsTrue(offset + count <= list.Count,
                           $"{nameof(offset)} + {nameof(count)} <= {nameof(list)}.{nameof(List<T>.Count)}, {offset}, {count}, {list.Count}");
-            */
-
+            
             if (count == 0)
             {
                 return;
@@ -150,11 +147,9 @@ namespace Fp.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IList<T> SwapAndRemove<T>(this IList<T> list, int removedItemIdx)
         {
-            /*
             Assert.IsNotNull(list);
             Assert.IsTrue(removedItemIdx >= 0 && removedItemIdx < list.Count);
-            */
-
+            
             int lastIdx = list.Count - 1;
 
             if (removedItemIdx != lastIdx)
@@ -332,7 +327,6 @@ namespace Fp.Collections
             ref int rightIdx,
             IComparer<T> comparer)
         {
-            /*
             Assert.IsNotNull(list);
             Assert.IsNotNull(comparer);
 
@@ -343,8 +337,7 @@ namespace Fp.Collections
             Assert.IsTrue(list.Count >= leftIdx + rightIdx, "list.Count >= index + count");
             Assert.IsTrue(IsOrdered(list, leftIdx, rightIdx), "IsOrdered(list)");
             Assert.IsTrue(Comparer<T>.Default.Compare(minValue, maxValue) <= 0, "minValue < maxValue");
-            */
-
+            
             //Find left bound
             int li = list.InSortLeft(minValue, 0, rightIdx, comparer);
             //Find right bound
@@ -369,7 +362,6 @@ namespace Fp.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOrdered<T>(this IList<T> list, int startIdx, int endIdx, IComparer<T> comparer)
         {
-            /*
             Assert.IsNotNull(list);
             Assert.IsNotNull(comparer);
 
@@ -378,8 +370,7 @@ namespace Fp.Collections
             Assert.IsTrue(startIdx < list.Count, "startIdx < list.Count");
             Assert.IsTrue(endIdx <= list.Count, "endIdx <= list.Count");
             Assert.IsTrue(startIdx <= endIdx, "startIdx <= endIdx");
-            */
-
+            
             if (endIdx - startIdx <= 1)
             {
                 return true;

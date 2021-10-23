@@ -4,4 +4,40 @@
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Include="..\Unity\Assets\Runtime\Assert.cs">
+        <Link>Assert.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\BisectUtility.cs">
+        <Link>BisectUtility.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\CollectionUtils.cs">
+        <Link>CollectionUtils.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\FpBiMap.cs">
+        <Link>FpBiMap.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\FpDeque.cs">
+        <Link>FpDeque.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\FpDictionary.cs">
+        <Link>FpDictionary.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\FpLinkedList.cs">
+        <Link>FpLinkedList.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\FpLinkedListNode.cs">
+        <Link>FpLinkedListNode.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\HashHelpers.cs">
+        <Link>HashHelpers.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\ILinkedList.cs">
+        <Link>ILinkedList.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\Sort.cs">
+        <Link>Sort.cs</Link>
+      </Compile>
+    </ItemGroup>
+
 </Project>

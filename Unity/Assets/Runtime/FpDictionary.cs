@@ -593,7 +593,6 @@ namespace Fp.Collections
         protected void CopyTo<T>(T[] array, int index)
             where T : struct, IKeyValueType
         {
-            /*
             Assert.IsNotNull(array, $"{nameof(array)} != null");
 
             Assert.IsFalse(index < 0, $"{nameof(index)}({index}) < 0");
@@ -601,7 +600,6 @@ namespace Fp.Collections
 
             Assert.IsFalse(array.Length - index < Count,
                            $"{nameof(array)}.{nameof(array.Length)}({array.Length}) - {nameof(index)}({index}) < {nameof(Count)}({Count})");
-                           */
 
             int count = _count;
             Entry[] entries = _entries;

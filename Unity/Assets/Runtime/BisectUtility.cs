@@ -23,14 +23,12 @@ namespace Fp.Collections
             int rightIdx,
             IComparer<T> comparer)
         {
-            /*
             Assert.IsNotNull(list);
             Assert.IsNotNull(comparer);
             Assert.IsTrue(leftIdx >= 0, "leftIdx >= 0");
             Assert.IsTrue(rightIdx >= 0, "rightIdx >= 0");
             Assert.IsTrue(leftIdx <= rightIdx, "leftIdx <= rightIdx");
-            */
-
+            
             while (leftIdx < rightIdx)
             {
                 int mid = (leftIdx + rightIdx) / 2;
@@ -67,13 +65,11 @@ namespace Fp.Collections
             int rightIdx,
             IComparer<T> comparer)
         {
-            /*
             Assert.IsNotNull(list);
             Assert.IsNotNull(comparer);
             Assert.IsTrue(leftIdx >= 0, "idx >= 0");
             Assert.IsTrue(rightIdx >= 0, "count >= 0");
             Assert.IsTrue(leftIdx <= rightIdx, "leftIdx <= rightIdx");
-            */
 
             while (leftIdx < rightIdx)
             {

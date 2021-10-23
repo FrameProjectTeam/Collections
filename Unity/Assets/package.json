@@ -1,0 +1,10 @@
+{
+  "name": "com.fp.collections",
+  "version": "1.0.0",
+  "displayName": "FrameProject Collections",
+  "description": "Special collection implementation",
+  "unity": "2019.1",
+  "keywords": ["Collection"],
+  "author": { "name": "Frame Project", "email": "Yevhenii.Vitiuk@gmail.com"},
+  "license": "MIT"
+}
