@@ -143,6 +143,60 @@ namespace Fp.Collections
             node = new FpLinkedListNode<T>(this, idx, _version);
         }
 
+        public void AddAfter(in FpLinkedListNode<T> node, T value, out FpLinkedListNode<T> insertedNode)
+        {
+            ValidateNode(in node);
+            
+            TakePlace(out int idx);
+
+            if (_last == node.Idx)
+            {
+                _last = idx;
+            }
+            
+            _entries[idx].Value = value;
+            _entries[idx].Previous = node.Idx;
+            _entries[idx].Next = _entries[node.Idx].Next;
+            _entries[idx].Version = ++_version;
+
+            _entries[node.Idx].Next = idx;
+            
+            insertedNode = new FpLinkedListNode<T>(this, idx, _version);
+        }
+
+        public void AddBefore(in FpLinkedListNode<T> node, T value, out FpLinkedListNode<T> insertedNode)
+        {
+            ValidateNode(in node);
+            
+            TakePlace(out int idx);
+
+            if (_first == node.Idx)
+            {
+                _first = idx;
+            }
+
+            _entries[idx].Value = value;
+            _entries[idx].Previous = _entries[node.Idx].Previous;
+            _entries[idx].Next = node.Idx;
+            _entries[idx].Version = ++_version;
+
+            _entries[node.Idx].Previous = idx;
+            
+            insertedNode = new FpLinkedListNode<T>(this, idx, _version);
+        }
+        
+        public FpLinkedListNode<T> AddAfter(in FpLinkedListNode<T> node, T value)
+        {
+            AddAfter(in node, value, out FpLinkedListNode<T> result);
+            return result;
+        }
+
+        public FpLinkedListNode<T> AddBefore(in FpLinkedListNode<T> node, T value)
+        {
+            AddBefore(in node, value, out FpLinkedListNode<T> result);
+            return result;
+        }
+
         public T GetValue(in FpLinkedListNode<T> node)
         {
             ValidateNode(in node);
@@ -229,6 +283,7 @@ namespace Fp.Collections
             return new Enumerator(this);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool IsValidNode(in FpLinkedListNode<T> node)
         {
             return _entries[node.Idx].Version <= node.Version;

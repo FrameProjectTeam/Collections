@@ -269,5 +269,62 @@ namespace Fp.Collection.Unit
 
             Assert.AreEqual(0, _llStr.Count);
         }
+
+        [Test]
+        public void AddAfterBefore()
+        {
+            FpLinkedListNode<string> first = _llStr.AddLast("Second");
+            _llStr.AddAfter(in first, "Third");
+            _llStr.AddBefore(in first, "First");
+            
+            CollectionAssert.AreEqual(new [] {"First", "Second", "Third"}, _llStr);
+        }
+
+        [Test]
+        public void EnumeratorVersionCheck()
+        {
+            FpLinkedListNode<string> first = _llStr.AddLast("Second");
+            _llStr.AddAfter(in first, "Third");
+            _llStr.AddBefore(in first, "First");
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                foreach (string s in _llStr)
+                {
+                    _llStr.Remove(in first);
+                }
+            });
+        }
+
+        [Test]
+        public void EnumeratorReset()
+        {
+            FpLinkedListNode<string> first = _llStr.AddLast("Second");
+            _llStr.AddAfter(in first, "Third");
+            _llStr.AddBefore(in first, "First");
+
+            FpLinkedList<string>.Enumerator enumerator = _llStr.GetEnumerator();
+
+            var idx = 0;
+            var firstArr = new string[_llStr.Count];
+            var secondArr = new string[_llStr.Count];
+            
+            while (enumerator.MoveNext())
+            {
+                firstArr[idx++] = enumerator.Current;
+            }
+
+            idx = 0;
+            enumerator.Reset();
+            
+            while (enumerator.MoveNext())
+            {
+                secondArr[idx++] = enumerator.Current;
+            }
+            
+            CollectionAssert.AreEqual(firstArr, secondArr);
+            CollectionAssert.AreEqual(firstArr, _llStr);
+            CollectionAssert.AreEqual(secondArr, _llStr);
+        }
     }
 }

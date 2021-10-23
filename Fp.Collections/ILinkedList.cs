@@ -13,6 +13,11 @@ namespace Fp.Collections
         FpLinkedListNode<T> AddLast(T value);
         void AddLast(T value, out FpLinkedListNode<T> node);
 
+        void AddAfter(in FpLinkedListNode<T> node, T value, out FpLinkedListNode<T> insertedNode);
+        FpLinkedListNode<T> AddAfter(in FpLinkedListNode<T> node, T value);
+        void AddBefore(in FpLinkedListNode<T> node, T value, out FpLinkedListNode<T> insertedNode);
+        FpLinkedListNode<T> AddBefore(in FpLinkedListNode<T> node, T value);
+        
         void Remove(in FpLinkedListNode<T> node);
 
         T GetValue(in FpLinkedListNode<T> node);

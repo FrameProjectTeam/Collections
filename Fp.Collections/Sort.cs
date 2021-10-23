@@ -27,7 +27,7 @@ namespace Fp.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Partition<T, TCmp>(IList<T> arr, IComparer<T> comparer, int lo, int hi)
+        private static int Partition<T>(IList<T> arr, IComparer<T> comparer, int lo, int hi)
         {
             return Partition<T, IComparer<T>>(arr, comparer, lo, hi);
         }
