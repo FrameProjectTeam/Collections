@@ -1,8 +1,8 @@
 {
   "name": "com.fp.collections",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "FrameProject Collections",
-  "description": "Special collection implementation",
+  "description": "New or extended collections for common use",
   "unity": "2019.1",
   "keywords": ["Collection"],
   "author": { "name": "Frame Project", "email": "Yevhenii.Vitiuk@gmail.com"},

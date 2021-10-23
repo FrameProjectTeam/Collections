@@ -211,6 +211,42 @@ namespace Fp.Collections
             _entries[node.Idx].Value = value;
         }
 
+        /// <summary>
+        ///     Swap values internally without version changes
+        /// </summary>
+        /// <param name="first">First node of this sequence</param>
+        /// <param name="second">Second node of this sequence</param>
+        public void SwapValuesSilent(in FpLinkedListNode<T> first, in FpLinkedListNode<T> second)
+        {
+            ValidateNode(in first);
+            ValidateNode(in second);
+
+            (_entries[first.Idx].Value, _entries[second.Idx].Value) = (_entries[second.Idx].Value, _entries[first.Idx].Value);
+            _entries[First.Idx].Version = ++_version;
+            _entries[second.Idx].Version = _version;
+        }
+        
+        /// <summary>
+        ///     Swap values and refresh nodes to valid state
+        /// </summary>
+        /// <param name="first">First node of this sequence</param>
+        /// <param name="second">Second node of this sequence</param>
+        public void SwapValues(ref FpLinkedListNode<T> first, ref FpLinkedListNode<T> second)
+        {
+            ValidateNode(in first);
+            ValidateNode(in second);
+
+            (_entries[first.Idx].Value, _entries[second.Idx].Value) = (_entries[second.Idx].Value, _entries[first.Idx].Value);
+            
+            _version++;
+            
+            _entries[first.Idx].Version = _version;
+            _entries[second.Idx].Version = _version;
+
+            first = new FpLinkedListNode<T>(this, first.Idx, _version);
+            second = new FpLinkedListNode<T>(this, second.Idx, _version);
+        }
+        
         public bool TryGetNextNode(in FpLinkedListNode<T> node, out FpLinkedListNode<T> next)
         {
             ValidateNode(in node);

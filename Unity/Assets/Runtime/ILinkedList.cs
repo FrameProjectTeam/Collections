@@ -28,5 +28,19 @@ namespace Fp.Collections
         void Clear();
         bool TryGetFirst(out FpLinkedListNode<T> node);
         bool TryGetLast(out FpLinkedListNode<T> node);
+
+        /// <summary>
+        ///     Swap values internally without version changes
+        /// </summary>
+        /// <param name="first">First node of this sequence</param>
+        /// <param name="second">Second node of this sequence</param>
+        void SwapValuesSilent(in FpLinkedListNode<T> first, in FpLinkedListNode<T> second);
+
+        /// <summary>
+        ///     Swap values and refresh nodes to valid state
+        /// </summary>
+        /// <param name="first">First node of this sequence</param>
+        /// <param name="second">Second node of this sequence</param>
+        void SwapValues(ref FpLinkedListNode<T> first, ref FpLinkedListNode<T> second);
     }
 }

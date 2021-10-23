@@ -115,8 +115,8 @@ namespace Fp.Collections
         private bool IsFull => Count == Capacity;
 
         /// <summary>
-        ///     Gets a value indicating whether the buffer is "split" (meaning the beginning of the view is at a later index in
-        ///     <see cref="_buffer" /> than the end).
+        ///     Gets a value indicating whether the buffer is "split"
+        ///     (meaning the beginning of the view is at a later index in <see cref="_buffer" /> than the end).
         /// </summary>
         private bool IsSplit => _offset > Capacity - Count;
 
@@ -266,6 +266,7 @@ namespace Fp.Collections
         public int BinarySearchLast<TComparer>(int index, int length, in T target, in TComparer comparer)
             where TComparer : IComparer<T>
         {
+            //TODO: Do assert element ordering in passed range
             int lower = index;
             int upper = index + length - 1;
             int rIdx = -1;
@@ -324,7 +325,7 @@ namespace Fp.Collections
         /// </summary>
         /// <returns>The former last element.</returns>
         /// <exception cref="InvalidOperationException">The deque is empty.</exception>
-        public T PopEnd()
+        public T PopRight()
         {
             if (IsEmpty)
             {
@@ -342,7 +343,7 @@ namespace Fp.Collections
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The deque has less element than passed <paramref name="count" />
         /// </exception>
-        public void RemoveEnd(int count)
+        public void RemoveRight(int count)
         {
             if (count > Count || count < 0)
             {
@@ -362,7 +363,7 @@ namespace Fp.Collections
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException">The deque is empty.</exception>
-        public ref T PeekEnd()
+        public ref T PeekRight()
         {
             ThrowDequeIfEmpty();
 
@@ -373,7 +374,7 @@ namespace Fp.Collections
         ///     Peek the right element of this deque by offset from right side
         /// </summary>
         /// <param name="rightIndex">offset from right side</param>
-        public ref T PeekEnd(int rightIndex)
+        public ref T PeekRight(int rightIndex)
         {
             ThrowDequeIfEmpty();
             CheckExistingIndexArgument(Count, rightIndex);
@@ -385,7 +386,7 @@ namespace Fp.Collections
         /// </summary>
         /// <param name="value">Last element</param>
         /// <returns>True if not empty</returns>
-        public bool TryPeekEnd(out T value)
+        public bool TryPeekRight(out T value)
         {
             if (IsEmpty)
             {
@@ -402,7 +403,7 @@ namespace Fp.Collections
         /// </summary>
         /// <returns>The former first element.</returns>
         /// <exception cref="InvalidOperationException">The deque is empty.</exception>
-        public T PopBegin()
+        public T PopLeft()
         {
             if (IsEmpty)
             {
@@ -420,7 +421,7 @@ namespace Fp.Collections
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The deque has less element than passed <paramref name="count" />
         /// </exception>
-        public void RemoveBegin(int count)
+        public void RemoveLeft(int count)
         {
             if (count > Count || count < 0)
             {
@@ -440,7 +441,7 @@ namespace Fp.Collections
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException">The deque is empty.</exception>
-        public ref T PeekBegin()
+        public ref T PeekLeft()
         {
             ThrowDequeIfEmpty();
 
@@ -452,7 +453,7 @@ namespace Fp.Collections
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public ref T PeekBegin(int index)
+        public ref T PeekLeft(int index)
         {
             return ref PeekItem(index);
         }
@@ -462,7 +463,7 @@ namespace Fp.Collections
         /// </summary>
         /// <param name="value">First element</param>
         /// <returns>True if not empty</returns>
-        public bool TryPeekBegin(out T value)
+        public bool TryPeekLeft(out T value)
         {
             if (IsEmpty)
             {
@@ -491,7 +492,7 @@ namespace Fp.Collections
         public T[] ToArray()
         {
             var result = new T[Count];
-            ((ICollection<T>) this).CopyTo(result, 0);
+            ((ICollection<T>)this).CopyTo(result, 0);
             return result;
         }
 
@@ -831,7 +832,7 @@ namespace Fp.Collections
 #endif
 
             int newCapacity = Capacity * 2;
-            if ((uint) newCapacity > MaximumCapacity)
+            if ((uint)newCapacity > MaximumCapacity)
             {
                 newCapacity = MaximumCapacity;
             }
@@ -1018,7 +1019,7 @@ namespace Fp.Collections
         }
 
         /// <summary>
-        ///     Adds an item to the end of this list.
+        ///     Adds an item to the right side of this deque.
         /// </summary>
         /// <param name="item">The object to add to this list.</param>
         /// <exception cref="T:System.NotSupportedException">
@@ -1186,18 +1187,18 @@ namespace Fp.Collections
                 throw new ArgumentException("Value is of incorrect type.", nameof(value));
             }
 
-            AddToRight((T) value);
+            AddToRight((T)value);
             return Count - 1;
         }
 
         bool IList.Contains(object value)
         {
-            return IsT(value) && ((ICollection<T>) this).Contains((T) value);
+            return IsT(value) && ((ICollection<T>)this).Contains((T)value);
         }
 
         int IList.IndexOf(object value)
         {
-            return IsT(value) ? IndexOf((T) value) : -1;
+            return IsT(value) ? IndexOf((T)value) : -1;
         }
 
         void IList.Insert(int index, object value)
@@ -1212,7 +1213,7 @@ namespace Fp.Collections
                 throw new ArgumentException("Value is of incorrect type.", nameof(value));
             }
 
-            Insert(index, (T) value);
+            Insert(index, (T)value);
         }
 
         bool IList.IsFixedSize => false;
@@ -1223,7 +1224,7 @@ namespace Fp.Collections
         {
             if (IsT(value))
             {
-                Remove((T) value);
+                Remove((T)value);
             }
         }
 
@@ -1243,7 +1244,7 @@ namespace Fp.Collections
                     throw new ArgumentException("Value is of incorrect type.", nameof(value));
                 }
 
-                this[index] = (T) value;
+                this[index] = (T)value;
             }
         }
 
