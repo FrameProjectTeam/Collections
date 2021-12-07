@@ -107,12 +107,20 @@ namespace Fp.Collections
         /// <summary>
         ///     Gets a value indicating whether this instance is empty.
         /// </summary>
-        private bool IsEmpty => Count == 0;
+        public bool IsEmpty
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Count == 0;
+        }
 
         /// <summary>
         ///     Gets a value indicating whether this instance is at full capacity.
         /// </summary>
-        private bool IsFull => Count == Capacity;
+        private bool IsFull
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Count == Capacity;
+        }
 
         /// <summary>
         ///     Gets a value indicating whether the buffer is "split"
