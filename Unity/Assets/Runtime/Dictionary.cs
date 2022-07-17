@@ -8,17 +8,17 @@ using System.Threading;
 
 namespace Fp.Collections
 {
-    public class FpDictionary<TKey, TValue> : FpDictionary<TKey, TValue, IEqualityComparer<TKey>>
+    public class Dictionary<TKey, TValue> : Dictionary<TKey, TValue, IEqualityComparer<TKey>>
     {
-        public FpDictionary() : base(EqualityComparer<TKey>.Default) { }
-        public FpDictionary(IEqualityComparer<TKey> comparer) : base(comparer ?? EqualityComparer<TKey>.Default) { }
-        public FpDictionary(int capacity, IEqualityComparer<TKey> comparer = null) : base(capacity, comparer ?? EqualityComparer<TKey>.Default) { }
+        public Dictionary() : base(EqualityComparer<TKey>.Default) { }
+        public Dictionary(IEqualityComparer<TKey> comparer) : base(comparer ?? EqualityComparer<TKey>.Default) { }
+        public Dictionary(int capacity, IEqualityComparer<TKey> comparer = null) : base(capacity, comparer ?? EqualityComparer<TKey>.Default) { }
 
-        public FpDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer = null) : base(
+        public Dictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer = null) : base(
             dictionary, comparer ?? EqualityComparer<TKey>.Default) { }
     }
 
-    public class FpDictionary<TKey, TValue, TComparer> : IDictionary, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+    public class Dictionary<TKey, TValue, TComparer> : IDictionary, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
         where TComparer : IEqualityComparer<TKey>
     {
         [NonSerialized]
@@ -48,9 +48,9 @@ namespace Fp.Collections
         [NonSerialized]
         private object _syncRoot;
 
-        public FpDictionary(TComparer comparer) : this(0, comparer) { }
+        public Dictionary(TComparer comparer) : this(0, comparer) { }
 
-        public FpDictionary(int capacity, TComparer comparer)
+        public Dictionary(int capacity, TComparer comparer)
         {
             if (capacity < 0)
             {
@@ -65,7 +65,7 @@ namespace Fp.Collections
             Comparer = comparer;
         }
 
-        public FpDictionary(IDictionary<TKey, TValue> dictionary, TComparer comparer) : this(dictionary?.Count ?? 0, comparer)
+        public Dictionary(IDictionary<TKey, TValue> dictionary, TComparer comparer) : this(dictionary?.Count ?? 0, comparer)
         {
             if (dictionary == null)
             {
@@ -617,16 +617,11 @@ namespace Fp.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected bool TryInsertInternal(in TKey key, TValue value, out int entryIdx)
+        protected bool TryInsertInternal(TKey key, TValue value, out int entryIdx)
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
-            }
-
-            if (_buckets == null)
-            {
-                Initialize(0);
             }
 
             int hashCode = Comparer.GetHashCode(key) & 0x7FFFFFFF;
@@ -671,7 +666,7 @@ namespace Fp.Collections
             return true;
         }
 
-        protected virtual void Insert(in TKey key, TValue value, bool add, out int entry)
+        protected virtual void Insert(TKey key, TValue value, bool add, out int entry)
         {
             if (TryInsertInternal(key, value, out entry))
             {
@@ -690,6 +685,7 @@ namespace Fp.Collections
         protected void ReplaceValueByEntry(ref int entry, ref TValue value)
         {
             _entries[entry].Value = value;
+            _version++;
         }
 
         private void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
@@ -807,13 +803,13 @@ namespace Fp.Collections
         {
             internal const int DictEntry = 1;
             internal const int KeyValuePair = 2;
-            private readonly FpDictionary<TKey, TValue, TComparer> _dictionary;
+            private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
             private readonly int _getEnumeratorRetType; // What should Enumerator.Current return?
             private readonly int _version;
             private KeyValuePair<TKey, TValue> _current;
             private int _index;
 
-            internal Enumerator(FpDictionary<TKey, TValue, TComparer> dictionary, int getEnumeratorRetType)
+            internal Enumerator(Dictionary<TKey, TValue, TComparer> dictionary, int getEnumeratorRetType)
             {
                 _dictionary = dictionary;
                 _index = 0;
@@ -946,9 +942,9 @@ namespace Fp.Collections
         [Serializable]
         public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
         {
-            private readonly FpDictionary<TKey, TValue, TComparer> _dictionary;
+            private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
 
-            public KeyCollection(FpDictionary<TKey, TValue, TComparer> dictionary)
+            public KeyCollection(Dictionary<TKey, TValue, TComparer> dictionary)
             {
                 _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
             }
@@ -1100,11 +1096,11 @@ namespace Fp.Collections
             [Serializable]
             public struct Enumerator : IEnumerator<TKey>
             {
-                private readonly FpDictionary<TKey, TValue, TComparer> _dictionary;
+                private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
                 private readonly int _version;
                 private int _index;
 
-                internal Enumerator(FpDictionary<TKey, TValue, TComparer> dictionary)
+                internal Enumerator(Dictionary<TKey, TValue, TComparer> dictionary)
                 {
                     _dictionary = dictionary;
                     _index = 0;
@@ -1182,9 +1178,9 @@ namespace Fp.Collections
         [Serializable]
         public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
         {
-            private readonly FpDictionary<TKey, TValue, TComparer> _dictionary;
+            private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
 
-            public ValueCollection(FpDictionary<TKey, TValue, TComparer> dictionary)
+            public ValueCollection(Dictionary<TKey, TValue, TComparer> dictionary)
             {
                 _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
             }
@@ -1336,11 +1332,11 @@ namespace Fp.Collections
             [Serializable]
             public struct Enumerator : IEnumerator<TValue>
             {
-                private readonly FpDictionary<TKey, TValue, TComparer> _dictionary;
+                private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
                 private readonly int _version;
                 private int _index;
 
-                internal Enumerator(FpDictionary<TKey, TValue, TComparer> dictionary)
+                internal Enumerator(Dictionary<TKey, TValue, TComparer> dictionary)
                 {
                     _dictionary = dictionary;
                     _index = 0;

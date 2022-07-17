@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>7.3</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <Compile Include="..\Unity\Assets\Runtime\Assert.cs">
         <Link>Assert.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\BiMap.cs">
+        <Link>BiMap.cs</Link>
       </Compile>
       <Compile Include="..\Unity\Assets\Runtime\BisectUtility.cs">
         <Link>BisectUtility.cs</Link>
@@ -14,26 +18,23 @@
       <Compile Include="..\Unity\Assets\Runtime\CollectionUtils.cs">
         <Link>CollectionUtils.cs</Link>
       </Compile>
-      <Compile Include="..\Unity\Assets\Runtime\FpBiMap.cs">
-        <Link>FpBiMap.cs</Link>
+      <Compile Include="..\Unity\Assets\Runtime\Deque.cs">
+        <Link>Deque.cs</Link>
       </Compile>
-      <Compile Include="..\Unity\Assets\Runtime\FpDeque.cs">
-        <Link>FpDeque.cs</Link>
-      </Compile>
-      <Compile Include="..\Unity\Assets\Runtime\FpDictionary.cs">
-        <Link>FpDictionary.cs</Link>
-      </Compile>
-      <Compile Include="..\Unity\Assets\Runtime\FpLinkedList.cs">
-        <Link>FpLinkedList.cs</Link>
-      </Compile>
-      <Compile Include="..\Unity\Assets\Runtime\FpLinkedListNode.cs">
-        <Link>FpLinkedListNode.cs</Link>
+      <Compile Include="..\Unity\Assets\Runtime\Dictionary.cs">
+        <Link>Dictionary.cs</Link>
       </Compile>
       <Compile Include="..\Unity\Assets\Runtime\HashHelpers.cs">
         <Link>HashHelpers.cs</Link>
       </Compile>
       <Compile Include="..\Unity\Assets\Runtime\ILinkedList.cs">
         <Link>ILinkedList.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\IReadOnlyLinkedList.cs">
+        <Link>IReadOnlyLinkedList.cs</Link>
+      </Compile>
+      <Compile Include="..\Unity\Assets\Runtime\LinkedList.cs">
+        <Link>LinkedList.cs</Link>
       </Compile>
       <Compile Include="..\Unity\Assets\Runtime\Sort.cs">
         <Link>Sort.cs</Link>

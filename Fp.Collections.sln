@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fp.Collections", "Fp.Collec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fp.Collection.Unit", "Fp.Collection.Unit\Fp.Collection.Unit.csproj", "{32482440-E25A-4B13-9844-1A464A88415F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fp.Collection.Bench", "Fp.Collection.Bench\Fp.Collection.Bench.csproj", "{882821B8-129D-486B-B6AB-51CC190DA8AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{32482440-E25A-4B13-9844-1A464A88415F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32482440-E25A-4B13-9844-1A464A88415F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32482440-E25A-4B13-9844-1A464A88415F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{882821B8-129D-486B-B6AB-51CC190DA8AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{882821B8-129D-486B-B6AB-51CC190DA8AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{882821B8-129D-486B-B6AB-51CC190DA8AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{882821B8-129D-486B-B6AB-51CC190DA8AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

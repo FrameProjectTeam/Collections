@@ -15,8 +15,8 @@ namespace Fp.Collections
     /// </summary>
     /// <typeparam name="T">The type of elements contained in the deque.</typeparam>
     [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}")]
-    [DebuggerTypeProxy(typeof(FpDeque<>.DebugView))]
-    public sealed class FpDeque<T> : IList<T>, IReadOnlyList<T>, IList
+    [DebuggerTypeProxy(typeof(Deque<>.DebugView))]
+    public sealed class Deque<T> : IList<T>, IReadOnlyList<T>, IList
     {
         private const int DefaultCapacity = 4;
 
@@ -29,10 +29,10 @@ namespace Fp.Collections
         private int _version;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="FpDeque{T}" /> class with the specified capacity.
+        ///     Initializes a new instance of the <see cref="Deque{T}" /> class with the specified capacity.
         /// </summary>
         /// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
-        public FpDeque(int capacity)
+        public Deque(int capacity)
         {
             if (capacity <= 0)
             {
@@ -43,11 +43,11 @@ namespace Fp.Collections
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="FpDeque{T}" /> class with the elements from the specified
+        ///     Initializes a new instance of the <see cref="Deque{T}" /> class with the elements from the specified
         ///     collection.
         /// </summary>
         /// <param name="list">The collection. May not be <c>null</c>.</param>
-        public FpDeque(IReadOnlyList<T> list)
+        public Deque(IReadOnlyList<T> list)
         {
             if (list == null)
             {
@@ -67,9 +67,9 @@ namespace Fp.Collections
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="FpDeque{T}" /> class.
+        ///     Initializes a new instance of the <see cref="Deque{T}" /> class.
         /// </summary>
-        public FpDeque()
+        public Deque()
             : this(DefaultCapacity) { }
 
         /// <summary>
@@ -856,9 +856,9 @@ namespace Fp.Collections
         [DebuggerNonUserCode]
         private sealed class DebugView
         {
-            private readonly FpDeque<T> _deque;
+            private readonly Deque<T> _deque;
 
-            public DebugView(FpDeque<T> deque)
+            public DebugView(Deque<T> deque)
             {
                 _deque = deque;
             }
@@ -869,14 +869,14 @@ namespace Fp.Collections
 
         public struct Enumerator : IEnumerator<T>
         {
-            private readonly FpDeque<T> _deque;
+            private readonly Deque<T> _deque;
             private readonly int _version;
             private readonly bool _isSplit;
             private readonly int _offset;
 
             private int _index;
 
-            public Enumerator(FpDeque<T> deque)
+            public Enumerator(Deque<T> deque)
             {
                 _deque = deque;
                 _version = deque._version;

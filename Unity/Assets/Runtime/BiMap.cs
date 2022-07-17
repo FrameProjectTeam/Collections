@@ -31,7 +31,7 @@ namespace Fp.Collections
 
         public int Count => Forward.Count;
 
-        private sealed class InternalDictionary<TKey, TValue, TForwardComparer, TBackwardComparer> : FpDictionary<TKey, TValue, TForwardComparer>
+        private sealed class InternalDictionary<TKey, TValue, TForwardComparer, TBackwardComparer> : Dictionary<TKey, TValue, TForwardComparer>
             where TForwardComparer : IEqualityComparer<TKey>
             where TBackwardComparer : IEqualityComparer<TValue>
         {
@@ -76,7 +76,7 @@ namespace Fp.Collections
                 base.Clear();
             }
 
-            protected override void Insert(in TKey key, TValue value, bool add, out int entry)
+            protected override void Insert(TKey key, TValue value, bool add, out int entry)
             {
                 if (TryInsertInternal(key, value, out entry))
                 {

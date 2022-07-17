@@ -1,46 +1,37 @@
 namespace Fp.Collections
 {
-    public interface ILinkedList<T>
-    {
-        FpLinkedListNode<T> First { get; }
-        FpLinkedListNode<T> Last { get; }
-        int Count { get; }
-        int Capacity { get; }
+	public interface ILinkedList<T> : IReadOnlyLinkedList<T>
+	{
+		int AddFirst(T value);
+		void AddFirst(T value, out int nodeIdx);
 
-        FpLinkedListNode<T> AddFirst(T value);
-        void AddFirst(T value, out FpLinkedListNode<T> node);
+		int AddLast(T value);
+		void AddLast(T value, out int node);
 
-        FpLinkedListNode<T> AddLast(T value);
-        void AddLast(T value, out FpLinkedListNode<T> node);
+		void AddAfter(int nodeIdx, T value, out int inserted);
+		int AddAfter(int nodeIdx, T value);
+		void AddBefore(int nodeIdx, T value, out int inserted);
+		int AddBefore(int nodeIdx, T value);
 
-        void AddAfter(in FpLinkedListNode<T> node, T value, out FpLinkedListNode<T> insertedNode);
-        FpLinkedListNode<T> AddAfter(in FpLinkedListNode<T> node, T value);
-        void AddBefore(in FpLinkedListNode<T> node, T value, out FpLinkedListNode<T> insertedNode);
-        FpLinkedListNode<T> AddBefore(in FpLinkedListNode<T> node, T value);
-        
-        void Remove(in FpLinkedListNode<T> node);
+		void Remove(int nodeIdx);
 
-        T GetValue(in FpLinkedListNode<T> node);
-        void SetValue(in FpLinkedListNode<T> node, T value);
+		void SetValue(int node, T value);
 
-        bool TryGetNextNode(in FpLinkedListNode<T> node, out FpLinkedListNode<T> next);
-        bool TryGetPreviousNode(in FpLinkedListNode<T> node, out FpLinkedListNode<T> previous);
-        void Clear();
-        bool TryGetFirst(out FpLinkedListNode<T> node);
-        bool TryGetLast(out FpLinkedListNode<T> node);
+		/// <summary>
+		///     Clear uses chain information. More effective if capacity much greater than count of exist element in linked list
+		/// </summary>
+		void ChainClear();
 
-        /// <summary>
-        ///     Swap values internally without version changes
-        /// </summary>
-        /// <param name="first">First node of this sequence</param>
-        /// <param name="second">Second node of this sequence</param>
-        void SwapValuesSilent(in FpLinkedListNode<T> first, in FpLinkedListNode<T> second);
+		/// <summary>
+		///     Clear uses capacity of internal buffers
+		/// </summary>
+		void Clear();
 
-        /// <summary>
-        ///     Swap values and refresh nodes to valid state
-        /// </summary>
-        /// <param name="first">First node of this sequence</param>
-        /// <param name="second">Second node of this sequence</param>
-        void SwapValues(ref FpLinkedListNode<T> first, ref FpLinkedListNode<T> second);
-    }
+		/// <summary>
+		///     Swap values by node indices
+		/// </summary>
+		/// <param name="firstIdx">First node index</param>
+		/// <param name="secondIdx">Second node index</param>
+		void Swap(int firstIdx, int secondIdx);
+	}
 }

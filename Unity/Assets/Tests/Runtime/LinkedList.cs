@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using NUnit.Framework;
 
@@ -8,82 +9,66 @@ namespace Fp.Collections.Tests
     public class LinkedList
     {
         private Random _rand;
-        private FpLinkedList<string> _llStr;
-        private FpLinkedList<double> _llDouble;
+        private LinkedList<string> _llStr;
+        private LinkedList<double> _llDouble;
 
         [SetUp]
         public void Setup()
         {
             _rand = new Random();
 
-            _llStr = new FpLinkedList<string>();
-            _llDouble = new FpLinkedList<double>();
+            _llStr = new LinkedList<string>();
+            _llDouble = new LinkedList<double>();
         }
 
         [Test]
         public void AddLastValue()
         {
-            FpLinkedListNode<string> firstNode = _llStr.AddLast("First");
-            FpLinkedListNode<string> secondNode = _llStr.AddLast("Second");
-            FpLinkedListNode<string> thirdNode = _llStr.AddLast("Third");
+            int firstNode = _llStr.AddLast("First");
+            int secondNode = _llStr.AddLast("Second");
+            int thirdNode = _llStr.AddLast("Third");
 
             Assert.AreEqual(3, _llStr.Count);
 
-            Assert.AreEqual("First", firstNode.Value);
-            Assert.AreEqual("Second", secondNode.Value);
-            Assert.AreEqual("Third", thirdNode.Value);
+            Assert.AreEqual("First", _llStr.GetValue(firstNode));
+            Assert.AreEqual("Second", _llStr.GetValue(secondNode));
+            Assert.AreEqual("Third", _llStr.GetValue(thirdNode));
         }
 
         [Test]
         public void AddFirstValue()
         {
-            FpLinkedListNode<string> thirdNode = _llStr.AddFirst("Third");
-            FpLinkedListNode<string> secondNode = _llStr.AddFirst("Second");
-            FpLinkedListNode<string> firstNode = _llStr.AddFirst("First");
+            int thirdNode = _llStr.AddFirst("Third");
+            int secondNode = _llStr.AddFirst("Second");
+            int firstNode = _llStr.AddFirst("First");
 
             Assert.AreEqual(3, _llStr.Count);
 
-            Assert.AreEqual("First", firstNode.Value);
-            Assert.AreEqual("Second", secondNode.Value);
-            Assert.AreEqual("Third", thirdNode.Value);
+            Assert.AreEqual("First", _llStr.GetValue(firstNode));
+            Assert.AreEqual("Second", _llStr.GetValue(secondNode));
+            Assert.AreEqual("Third", _llStr.GetValue(thirdNode));
         }
 
         [Test]
         public void AddRemove()
         {
-            FpLinkedListNode<string> firstNode = _llStr.AddLast("First");
-            _llStr.Remove(in firstNode);
+            int firstNode = _llStr.AddLast("First");
+            _llStr.Remove(firstNode);
 
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                string _ = firstNode.Value;
-            });
+            Assert.IsFalse(_llStr.HasValue(firstNode));
         }
 
         [Test]
         public void AddRemoveAdd()
         {
-            FpLinkedListNode<string> firstNode = _llStr.AddLast("First");
-            _llStr.Remove(in firstNode);
+            int firstNode = _llStr.AddLast("First");
+            _llStr.Remove(firstNode);
 
-            FpLinkedListNode<string> secondNode = _llStr.AddLast("Second");
+            int secondNode = _llStr.AddLast("Second");
 
             Assert.AreEqual(1, _llStr.Count);
-            Assert.AreEqual("Second", secondNode.Value);
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                string _ = firstNode.Value;
-            });
-        }
-
-        [Test]
-        public void InvalidNode()
-        {
-            FpLinkedListNode<string> invalidNode = default;
-            FpLinkedListNode<string> invalidNode2 = FpLinkedListNode<string>.Invalid;
-
-            Assert.Throws<InvalidOperationException>(() => { _llStr.GetValue(in invalidNode); });
-            Assert.Throws<InvalidOperationException>(() => { _llStr.GetValue(in invalidNode2); });
+            Assert.AreEqual(firstNode, secondNode);
+            Assert.AreEqual("Second", _llStr.GetValue(secondNode));
         }
 
         [Test]
@@ -94,7 +79,7 @@ namespace Fp.Collections.Tests
             _llStr.AddLast("Third");
 
             Assert.AreEqual(3, _llStr.Count);
-            Assert.AreEqual("First", _llStr.First.Value);
+            Assert.AreEqual("First", _llStr.GetValue(_llStr.FirstIdx));
         }
 
         [Test]
@@ -105,7 +90,7 @@ namespace Fp.Collections.Tests
             _llStr.AddLast("Third");
 
             Assert.AreEqual(3, _llStr.Count);
-            Assert.AreEqual("Third", _llStr.Last.Value);
+            Assert.AreEqual("Third", _llStr.GetValue(_llStr.LastIdx));
         }
 
         [Test]
@@ -116,8 +101,8 @@ namespace Fp.Collections.Tests
             _llStr.AddFirst("First");
 
             Assert.AreEqual(3, _llStr.Count);
-            Assert.AreEqual("First", _llStr.First.Value);
-            Assert.AreEqual("Third", _llStr.Last.Value);
+            Assert.AreEqual("First", _llStr.GetValue(_llStr.FirstIdx));
+            Assert.AreEqual("Third", _llStr.GetValue(_llStr.LastIdx));
         }
 
         [Test]
@@ -127,12 +112,12 @@ namespace Fp.Collections.Tests
             _llStr.AddLast("Third");
             _llStr.AddFirst("First");
 
-            FpLinkedListNode<string> firstNode = _llStr.First;
-            _llStr.Remove(in firstNode);
+            int firstNode = _llStr.FirstIdx;
+            _llStr.Remove(firstNode);
 
             Assert.AreEqual(2, _llStr.Count);
-            Assert.AreEqual("Second", _llStr.First.Value);
-            Assert.AreEqual("Third", _llStr.Last.Value);
+            Assert.AreEqual("Second", _llStr.GetValue(_llStr.FirstIdx));
+            Assert.AreEqual("Third", _llStr.GetValue(_llStr.LastIdx));
         }
 
         [Test]
@@ -142,28 +127,28 @@ namespace Fp.Collections.Tests
             _llStr.AddLast("Third");
             _llStr.AddFirst("First");
 
-            FpLinkedListNode<string> lastNode = _llStr.Last;
-            _llStr.Remove(in lastNode);
+            int lastNode = _llStr.LastIdx;
+            _llStr.Remove(lastNode);
 
             Assert.AreEqual(2, _llStr.Count);
-            Assert.AreEqual("First", _llStr.First.Value);
-            Assert.AreEqual("Second", _llStr.Last.Value);
+            Assert.AreEqual("First", _llStr.GetValue(_llStr.FirstIdx));
+            Assert.AreEqual("Second", _llStr.GetValue(_llStr.LastIdx));
         }
 
         [Test]
         public void ReplaceValue()
         {
             _llStr.AddLast("InvalidValue");
-            FpLinkedListNode<string> secondNode = _llStr.AddLast("InvalidValue");
+            int secondNode = _llStr.AddLast("InvalidValue");
             _llStr.AddLast("InvalidValue");
 
-            _llStr.SetValue(_llStr.First, "First");
+            _llStr.SetValue(_llStr.FirstIdx, "First");
             _llStr.SetValue(secondNode, "Second");
-            _llStr.SetValue(_llStr.Last, "Third");
+            _llStr.SetValue(_llStr.LastIdx, "Third");
 
-            Assert.AreEqual("First", _llStr.First.Value);
-            Assert.AreEqual("Second", secondNode.Value);
-            Assert.AreEqual("Third", _llStr.Last.Value);
+            Assert.AreEqual("First", _llStr.GetValue(_llStr.FirstIdx));
+            Assert.AreEqual("Second", _llStr.GetValue(secondNode));
+            Assert.AreEqual("Third", _llStr.GetValue(_llStr.LastIdx));
         }
 
         [Test]
@@ -198,8 +183,8 @@ namespace Fp.Collections.Tests
         [Test]
         public void InvalidOperation()
         {
-            Assert.IsFalse(_llStr.First.IsValid);
-            Assert.IsFalse(_llStr.Last.IsValid);
+            Assert.IsFalse(_llStr.FirstIdx >= 0);
+            Assert.IsFalse(_llStr.LastIdx >= 0);
         }
 
         [Test]
@@ -207,53 +192,45 @@ namespace Fp.Collections.Tests
         {
             _llStr.AddLast("Second");
             _llStr.AddLast("Third");
-            FpLinkedListNode<string> firstNode = _llStr.AddFirst("First");
+            int firstNode = _llStr.AddFirst("First");
 
-            bool hasSecond = _llStr.TryGetNextNode(in firstNode, out FpLinkedListNode<string> secondNode);
-            bool hasThird = _llStr.TryGetNextNode(in secondNode, out FpLinkedListNode<string> thirdNode);
-            bool hasFourth = _llStr.TryGetNextNode(in thirdNode, out FpLinkedListNode<string> fourthNode);
+            bool hasSecond = _llStr.TryGetNext(firstNode, out int secondNode);
+            bool hasThird = _llStr.TryGetNext(secondNode, out int thirdNode);
+            bool hasFourth = _llStr.TryGetNext(thirdNode, out int fourthNode);
 
             Assert.IsTrue(hasSecond);
-            Assert.IsTrue(secondNode.IsValid);
-            Assert.AreEqual("Second", secondNode.Value);
+            Assert.IsTrue(secondNode >= 0);
+            Assert.AreEqual("Second", _llStr.GetValue(secondNode));
 
             Assert.IsTrue(hasThird);
-            Assert.IsTrue(thirdNode.IsValid);
-            Assert.AreEqual("Third", thirdNode.Value);
+            Assert.IsTrue(thirdNode >= 0);
+            Assert.AreEqual("Third", _llStr.GetValue(thirdNode));
 
             Assert.IsFalse(hasFourth);
-            Assert.IsFalse(fourthNode.IsValid);
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                string _ = fourthNode.Value;
-            });
+            Assert.IsFalse(fourthNode >= 0);
         }
 
         [Test]
         public void PreviousNode()
         {
             _llStr.AddLast("Second");
-            FpLinkedListNode<string> thirdNode = _llStr.AddLast("Third");
+            int thirdNode = _llStr.AddLast("Third");
             _llStr.AddFirst("First");
 
-            bool hasSecond = _llStr.TryGetPreviousNode(in thirdNode, out FpLinkedListNode<string> secondNode);
-            bool hasFirst = _llStr.TryGetPreviousNode(in secondNode, out FpLinkedListNode<string> firstNode);
-            bool hasZero = _llStr.TryGetPreviousNode(in firstNode, out FpLinkedListNode<string> zeroNode);
+            bool hasSecond = _llStr.TryGetPrevious(thirdNode, out int secondNode);
+            bool hasFirst = _llStr.TryGetPrevious(secondNode, out int firstNode);
+            bool hasZero = _llStr.TryGetPrevious(firstNode, out int zeroNode);
 
             Assert.IsTrue(hasSecond);
-            Assert.IsTrue(secondNode.IsValid);
-            Assert.AreEqual("Second", secondNode.Value);
+            Assert.IsTrue(secondNode >= 0);
+            Assert.AreEqual("Second", _llStr.GetValue(secondNode));
 
             Assert.IsTrue(hasFirst);
-            Assert.IsTrue(firstNode.IsValid);
-            Assert.AreEqual("First", firstNode.Value);
+            Assert.IsTrue(firstNode >= 0);
+            Assert.AreEqual("First", _llStr.GetValue(firstNode));
 
             Assert.IsFalse(hasZero);
-            Assert.IsFalse(zeroNode.IsValid);
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                string _ = zeroNode.Value;
-            });
+            Assert.IsFalse(zeroNode >= 0);
         }
 
         [Test]
@@ -263,17 +240,89 @@ namespace Fp.Collections.Tests
             _llStr.AddLast("Second");
             _llStr.AddLast("Third");
 
-            _llStr.Clear();
+            _llStr.ChainClear();
 
             Assert.AreEqual(0, _llStr.Count);
         }
 
         [Test]
+        public void Swap()
+        {
+            var indices = new int[2];
+            indices[0] = _llStr.AddLast("Second");
+            indices[1] = _llStr.AddLast("First");
+
+            _llStr.Swap(indices[0], indices[1]);
+
+            Assert.AreEqual("First", _llStr.GetValue(indices[0]));
+            Assert.AreEqual("Second", _llStr.GetValue(indices[1]));
+        }
+
+        [Test]
+        public void TryGetFirstLast()
+        {
+            var indices = new int[3];
+            indices[0] = _llStr.AddLast("First");
+            indices[1] = _llStr.AddLast("Second");
+            indices[2] = _llStr.AddLast("Third");
+
+            bool hasFirst = _llStr.TryGetFirst(out int firstIdx);
+            bool hasLast = _llStr.TryGetLast(out int lastIdx);
+            
+            Assert.IsTrue(hasFirst);
+            Assert.AreEqual(indices[0], firstIdx);
+            Assert.IsTrue(hasLast);
+            Assert.AreEqual(indices[2], lastIdx);
+        }
+        
+        [Test]
+        public void TryGetFirstLast2()
+        {
+            var indices = new int[2];
+            indices[0] = _llStr.AddLast("First");
+            indices[1] = _llStr.AddLast("Third");
+
+            bool hasFirst = _llStr.TryGetFirst(out int firstIdx);
+            bool hasLast = _llStr.TryGetLast(out int lastIdx);
+            
+            Assert.IsTrue(hasFirst);
+            Assert.AreEqual(indices[0], firstIdx);
+            Assert.IsTrue(hasLast);
+            Assert.AreEqual(indices[1], lastIdx);
+        }
+        
+        [Test]
+        public void TryGetFirstLast3()
+        {
+            var indices = new int[1];
+            indices[0] = _llStr.AddLast("First");
+
+            bool hasFirst = _llStr.TryGetFirst(out int firstIdx);
+            bool hasLast = _llStr.TryGetLast(out int lastIdx);
+            
+            Assert.IsTrue(hasFirst);
+            Assert.IsTrue(hasLast);
+            Assert.AreEqual(indices[0], firstIdx);
+            Assert.AreEqual(firstIdx, lastIdx);
+        }
+        
+        
+        [Test]
+        public void TryGetFirstLast4()
+        {
+            bool hasFirst = _llStr.TryGetFirst(out _);
+            bool hasLast = _llStr.TryGetLast(out _);
+            
+            Assert.IsFalse(hasFirst);
+            Assert.IsFalse(hasLast);
+        }
+        
+        [Test]
         public void AddAfterBefore()
         {
-            FpLinkedListNode<string> first = _llStr.AddLast("Second");
-            _llStr.AddAfter(in first, "Third");
-            _llStr.AddBefore(in first, "First");
+            int first = _llStr.AddLast("Second");
+            _llStr.AddAfter(first, "Third");
+            _llStr.AddBefore(first, "First");
             
             CollectionAssert.AreEqual(new [] {"First", "Second", "Third"}, _llStr);
         }
@@ -281,27 +330,62 @@ namespace Fp.Collections.Tests
         [Test]
         public void EnumeratorVersionCheck()
         {
-            FpLinkedListNode<string> first = _llStr.AddLast("Second");
-            _llStr.AddAfter(in first, "Third");
-            _llStr.AddBefore(in first, "First");
+            int first = _llStr.AddLast("Second");
+            _llStr.AddAfter(first, "Third");
+            _llStr.AddBefore(first, "First");
 
             Assert.Throws<InvalidOperationException>(() =>
             {
                 foreach (string s in _llStr)
                 {
-                    _llStr.Remove(in first);
+                    _llStr.Remove(first);
                 }
             });
+        }
+        
+        [Test]
+        public void Add32Elements()
+        {
+            for(var i = 0; i < 32; i++)
+            {
+                _llStr.AddLast(i.ToString());
+            }
+
+            Assert.AreEqual(32, _llStr.Count);
+            CollectionAssert.AreEqual(Enumerable.Range(0, 32).Select(i => i.ToString()), _llStr);
+        }
+        
+                
+        [Test]
+        public void CheckCapacityBounds()
+        {
+            for(var i = 0; i < 32; i++)
+            {
+                _llStr.AddLast(i.ToString());
+            }
+            
+            _llStr.ChainClear();
+
+            Assert.GreaterOrEqual(_llStr.Capacity, 32);
+
+            Assert.IsFalse(_llStr.HasValue(-1));
+            Assert.IsFalse(_llStr.HasValue(0));
+            Assert.IsFalse(_llStr.HasValue(32));
+            Assert.IsFalse(_llStr.HasValue(_llStr.Capacity - 1));
+            Assert.IsFalse(_llStr.HasValue(_llStr.Capacity));
+            
+            Assert.Throws<IndexOutOfRangeException>(() => _llStr.GetValue(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => _llStr.GetValue(_llStr.Capacity));
         }
 
         [Test]
         public void EnumeratorReset()
         {
-            FpLinkedListNode<string> first = _llStr.AddLast("Second");
-            _llStr.AddAfter(in first, "Third");
-            _llStr.AddBefore(in first, "First");
+            int first = _llStr.AddLast("Second");
+            _llStr.AddAfter(first, "Third");
+            _llStr.AddBefore(first, "First");
 
-            FpLinkedList<string>.Enumerator enumerator = _llStr.GetEnumerator();
+            using LinkedList<string>.Enumerator enumerator = _llStr.GetEnumerator();
 
             var idx = 0;
             var firstArr = new string[_llStr.Count];

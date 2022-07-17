@@ -70,5 +70,11 @@ namespace Fp.Collections
         {
             (arr[a], arr[b]) = (arr[b], arr[a]);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Swap<T>(ref T a, ref T b)
+        {
+            (a, b) = (b, a);
+        }
     }
 }
