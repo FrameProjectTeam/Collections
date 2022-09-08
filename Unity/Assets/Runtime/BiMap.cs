@@ -52,9 +52,9 @@ namespace Fp.Collections
 
             public override bool TryAdd(in TKey key, TValue value)
             {
-                if (TryInsertInternal(key, value, out _))
+                if (TryInsert(key, value, out _))
                 {
-                    if (_bwdMap.TryInsertInternal(value, key, out _))
+                    if (_bwdMap.TryInsert(value, key, out _))
                     {
                         return true;
                     }
@@ -65,9 +65,9 @@ namespace Fp.Collections
                 return false;
             }
 
-            public override bool TryGetAndRemove(in TKey key, out TValue value)
+            public override bool TryRemove(in TKey key, out TValue value)
             {
-                return base.TryGetAndRemove(in key, out value) && _bwdMap.Remove(value);
+                return base.TryRemove(in key, out value) && _bwdMap.Remove(value);
             }
 
             public override void Clear()
@@ -76,18 +76,18 @@ namespace Fp.Collections
                 base.Clear();
             }
 
-            protected override void ReplaceOrInsert(TKey key, TValue value)
+            protected override void ReplaceOrInsert(in TKey key, TValue value)
             {
-                if (TryInsertInternal(key, value, out int entry))
+                if (TryInsert(key, value, out int entry))
                 {
-                    if (_bwdMap.TryInsertInternal(value, key, out int bwdEntry))
+                    if (_bwdMap.TryInsert(value, key, out int bwdEntry))
                     {
                         return;
                     }
 
                     //Remove old forward entry
                     TKey bwdOldValue = _bwdMap.GetValueByEntry(bwdEntry);
-                    TryGetAndRemoveInternal(bwdOldValue, out _);
+                    base.TryRemove(bwdOldValue, out _);
 
                     //Replace backward entry
                     TKey bwdNewValue = key;
@@ -98,28 +98,28 @@ namespace Fp.Collections
 
                 //Remove old backward entry
                 ref TValue fwdValue = ref GetValueByEntry(entry);
-                _bwdMap.TryGetAndRemoveInternal(fwdValue, out _);
+                _bwdMap.TryRemove(fwdValue, out _);
 
                 //Replace backward entry
-                _bwdMap.TryInsertInternal(value, key, out _);
+                _bwdMap.TryInsert(value, key, out _);
                 //Replace forward entry
                 fwdValue = value;
             }
 
-            protected override void Insert(TKey key, TValue value, out int entry)
+            protected override void Insert(in TKey key, TValue value, out int entry)
             {
-                if(!TryInsertInternal(key, value, out entry))
+                if(!TryInsert(key, value, out entry))
                 {
                     throw new ArgumentException($"Cant add duplicate key {key}");
                 }
 
-                if (_bwdMap.TryInsertInternal(value, key, out _))
+                if (_bwdMap.TryInsert(value, key, out _))
                 {
                     return;
                 }
 
                 //If can't add in backward remove already added item from forward
-                TryGetAndRemoveInternal(key, out _);
+                base.TryRemove(key, out _);
                 throw new ArgumentException($"Cant add duplicate key {value}");
             }
         }
