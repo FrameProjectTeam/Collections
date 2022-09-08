@@ -9,7 +9,8 @@
 		int Capacity { get; }
         
 		T GetValue(int nodeIdx);
-        
+		T GetValue(ref int nodeIdx);
+
 		bool HasValue(int nodeIdx);
 		bool HasValue(ref int nodeIdx);
 		

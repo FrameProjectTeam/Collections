@@ -15,6 +15,8 @@ namespace Fp.Collections
 
 		void Remove(int nodeIdx);
 
+		ref T GetValueRef(ref int nodeIdx);
+
 		void SetValue(int node, T value);
 
 		/// <summary>

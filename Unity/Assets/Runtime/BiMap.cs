@@ -13,15 +13,15 @@ namespace Fp.Collections
         where TFirstComparer : IEqualityComparer<TFirst>
         where TSecondComparer : IEqualityComparer<TSecond>
     {
-        private readonly InternalDictionary<TFirst, TSecond, TFirstComparer, TSecondComparer> _forward;
-        private readonly InternalDictionary<TSecond, TFirst, TSecondComparer, TFirstComparer> _backward;
+        private readonly InternalMap<TFirst, TSecond, TFirstComparer, TSecondComparer> _forward;
+        private readonly InternalMap<TSecond, TFirst, TSecondComparer, TFirstComparer> _backward;
 
         public BiMap(TFirstComparer firstComparer, TSecondComparer secondComparer) : this(0, firstComparer, secondComparer) { }
 
         public BiMap(int initialCapacity, TFirstComparer forwardComparer, TSecondComparer backwardComparer)
         {
-            _forward = new InternalDictionary<TFirst, TSecond, TFirstComparer, TSecondComparer>(initialCapacity, forwardComparer);
-            _backward = new InternalDictionary<TSecond, TFirst, TSecondComparer, TFirstComparer>(initialCapacity, backwardComparer);
+            _forward = new InternalMap<TFirst, TSecond, TFirstComparer, TSecondComparer>(initialCapacity, forwardComparer);
+            _backward = new InternalMap<TSecond, TFirst, TSecondComparer, TFirstComparer>(initialCapacity, backwardComparer);
             _forward.SetBackward(_backward);
             _backward.SetBackward(_forward);
         }
@@ -31,30 +31,30 @@ namespace Fp.Collections
 
         public int Count => Forward.Count;
 
-        private sealed class InternalDictionary<TKey, TValue, TForwardComparer, TBackwardComparer> : Dictionary<TKey, TValue, TForwardComparer>
+        private sealed class InternalMap<TKey, TValue, TForwardComparer, TBackwardComparer> : Map<TKey, TValue, TForwardComparer>
             where TForwardComparer : IEqualityComparer<TKey>
             where TBackwardComparer : IEqualityComparer<TValue>
         {
-            private InternalDictionary<TValue, TKey, TBackwardComparer, TForwardComparer> _bwdDictionary;
+            private InternalMap<TValue, TKey, TBackwardComparer, TForwardComparer> _bwdMap;
 
-            public InternalDictionary(TForwardComparer comparer) : base(comparer) { }
-            public InternalDictionary(int capacity, TForwardComparer comparer) : base(capacity, comparer) { }
-            public InternalDictionary(IDictionary<TKey, TValue> dictionary, TForwardComparer comparer) : base(dictionary, comparer) { }
+            public InternalMap(TForwardComparer comparer) : base(comparer) { }
+            public InternalMap(int capacity, TForwardComparer comparer) : base(capacity, comparer) { }
+            public InternalMap(IDictionary<TKey, TValue> dictionary, TForwardComparer comparer) : base(dictionary, comparer) { }
 
-            public void SetBackward(InternalDictionary<TValue, TKey, TBackwardComparer, TForwardComparer> backward)
+            public void SetBackward(InternalMap<TValue, TKey, TBackwardComparer, TForwardComparer> backward)
             {
                 Assert.IsNotNull(backward);
                 Assert.IsTrue(Count == 0);
                 Assert.IsTrue(backward.Count == 0);
 
-                _bwdDictionary = backward;
+                _bwdMap = backward;
             }
 
             public override bool TryAdd(in TKey key, TValue value)
             {
                 if (TryInsertInternal(key, value, out _))
                 {
-                    if (_bwdDictionary.TryInsertInternal(value, key, out _))
+                    if (_bwdMap.TryInsertInternal(value, key, out _))
                     {
                         return true;
                     }
@@ -67,55 +67,60 @@ namespace Fp.Collections
 
             public override bool TryGetAndRemove(in TKey key, out TValue value)
             {
-                return base.TryGetAndRemove(in key, out value) && _bwdDictionary.Remove(value);
+                return base.TryGetAndRemove(in key, out value) && _bwdMap.Remove(value);
             }
 
             public override void Clear()
             {
-                _bwdDictionary.Clear();
+                _bwdMap.Clear();
                 base.Clear();
             }
 
-            protected override void Insert(TKey key, TValue value, bool add, out int entry)
+            protected override void ReplaceOrInsert(TKey key, TValue value)
             {
-                if (TryInsertInternal(key, value, out entry))
+                if (TryInsertInternal(key, value, out int entry))
                 {
-                    if (_bwdDictionary.TryInsertInternal(value, key, out int bwdEntry))
+                    if (_bwdMap.TryInsertInternal(value, key, out int bwdEntry))
                     {
                         return;
                     }
 
-                    if (add)
-                    {
-                        //If can't add in backward remove already added item from forward
-                        TryGetAndRemoveInternal(key, out _);
-                        throw new ArgumentException($"Cant add duplicate key {value}");
-                    }
-
                     //Remove old forward entry
-                    TKey bwdOldValue = _bwdDictionary.GetValueByEntry(bwdEntry);
+                    TKey bwdOldValue = _bwdMap.GetValueByEntry(bwdEntry);
                     TryGetAndRemoveInternal(bwdOldValue, out _);
 
                     //Replace backward entry
                     TKey bwdNewValue = key;
-                    _bwdDictionary.ReplaceValueByEntry(ref bwdEntry, ref bwdNewValue);
+                    _bwdMap.ReplaceValueByEntry(ref bwdEntry, ref bwdNewValue);
 
                     return;
                 }
 
-                if (add)
+                //Remove old backward entry
+                ref TValue fwdValue = ref GetValueByEntry(entry);
+                _bwdMap.TryGetAndRemoveInternal(fwdValue, out _);
+
+                //Replace backward entry
+                _bwdMap.TryInsertInternal(value, key, out _);
+                //Replace forward entry
+                fwdValue = value;
+            }
+
+            protected override void Insert(TKey key, TValue value, out int entry)
+            {
+                if(!TryInsertInternal(key, value, out entry))
                 {
                     throw new ArgumentException($"Cant add duplicate key {key}");
                 }
 
-                //Remove old backward entry
-                ref TValue fwdValue = ref GetValueByEntry(entry);
-                _bwdDictionary.TryGetAndRemoveInternal(fwdValue, out _);
+                if (_bwdMap.TryInsertInternal(value, key, out _))
+                {
+                    return;
+                }
 
-                //Replace backward entry
-                _bwdDictionary.TryInsertInternal(value, key, out _);
-                //Replace forward entry
-                fwdValue = value;
+                //If can't add in backward remove already added item from forward
+                TryGetAndRemoveInternal(key, out _);
+                throw new ArgumentException($"Cant add duplicate key {value}");
             }
         }
     }

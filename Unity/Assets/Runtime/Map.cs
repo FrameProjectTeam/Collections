@@ -8,17 +8,17 @@ using System.Threading;
 
 namespace Fp.Collections
 {
-    public class Dictionary<TKey, TValue> : Dictionary<TKey, TValue, IEqualityComparer<TKey>>
+    public class Map<TKey, TValue> : Map<TKey, TValue, IEqualityComparer<TKey>>
     {
-        public Dictionary() : base(EqualityComparer<TKey>.Default) { }
-        public Dictionary(IEqualityComparer<TKey> comparer) : base(comparer ?? EqualityComparer<TKey>.Default) { }
-        public Dictionary(int capacity, IEqualityComparer<TKey> comparer = null) : base(capacity, comparer ?? EqualityComparer<TKey>.Default) { }
+        public Map() : base(EqualityComparer<TKey>.Default) { }
+        public Map(IEqualityComparer<TKey> comparer) : base(comparer ?? EqualityComparer<TKey>.Default) { }
+        public Map(int capacity, IEqualityComparer<TKey> comparer = null) : base(capacity, comparer ?? EqualityComparer<TKey>.Default) { }
 
-        public Dictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer = null) : base(
+        public Map(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer = null) : base(
             dictionary, comparer ?? EqualityComparer<TKey>.Default) { }
     }
 
-    public class Dictionary<TKey, TValue, TComparer> : IDictionary, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+    public class Map<TKey, TValue, TComparer> : IDictionary, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
         where TComparer : IEqualityComparer<TKey>
     {
         [NonSerialized]
@@ -48,9 +48,9 @@ namespace Fp.Collections
         [NonSerialized]
         private object _syncRoot;
 
-        public Dictionary(TComparer comparer) : this(0, comparer) { }
+        public Map(TComparer comparer) : this(0, comparer) { }
 
-        public Dictionary(int capacity, TComparer comparer)
+        public Map(int capacity, TComparer comparer)
         {
             if (capacity < 0)
             {
@@ -65,7 +65,7 @@ namespace Fp.Collections
             Comparer = comparer;
         }
 
-        public Dictionary(IDictionary<TKey, TValue> dictionary, TComparer comparer) : this(dictionary?.Count ?? 0, comparer)
+        public Map(IDictionary<TKey, TValue> dictionary, TComparer comparer) : this(dictionary?.Count ?? 0, comparer)
         {
             if (dictionary == null)
             {
@@ -80,9 +80,9 @@ namespace Fp.Collections
 
         public TComparer Comparer { get; }
 
-        public KeyCollection Keys => _keys ?? (_keys = new KeyCollection(this));
+        public KeyCollection Keys => _keys ??= new KeyCollection(this);
 
-        public ValueCollection Values => _values ?? (_values = new ValueCollection(this));
+        public ValueCollection Values => _values ??= new ValueCollection(this);
 
         public TValue this[in TKey key]
         {
@@ -96,7 +96,7 @@ namespace Fp.Collections
 
                 throw new KeyNotFoundException();
             }
-            set => Insert(key, value, false, out _);
+            set => ReplaceOrInsert(key, value);
         }
 
 #region ICollection Implementation
@@ -329,9 +329,9 @@ namespace Fp.Collections
 
 #region IDictionary<TKey,TValue> Implementation
 
-        ICollection<TKey> IDictionary<TKey, TValue>.Keys => _keys = _keys ?? (_keys = new KeyCollection(this));
+        ICollection<TKey> IDictionary<TKey, TValue>.Keys => _keys = _keys ??= new KeyCollection(this);
 
-        ICollection<TValue> IDictionary<TKey, TValue>.Values => _values ?? (_values = new ValueCollection(this));
+        ICollection<TValue> IDictionary<TKey, TValue>.Values => _values ??= new ValueCollection(this);
 
         public void Add(TKey key, TValue value)
         {
@@ -381,9 +381,9 @@ namespace Fp.Collections
 
 #region IReadOnlyDictionary<TKey,TValue> Implementation
 
-        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => _keys ?? (_keys = new KeyCollection(this));
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => _keys ??= new KeyCollection(this);
 
-        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _values ?? (_values = new ValueCollection(this));
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _values ??= new ValueCollection(this);
 
         bool IReadOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
         {
@@ -401,7 +401,7 @@ namespace Fp.Collections
 
         public int Add(in TKey key, TValue value)
         {
-            Insert(key, value, true, out int entry);
+            Insert(key, value, out int entry);
             return entry;
         }
 
@@ -666,16 +666,21 @@ namespace Fp.Collections
             return true;
         }
 
-        protected virtual void Insert(TKey key, TValue value, bool add, out int entry)
+        protected virtual void Insert(TKey key, TValue value, out int entry)
         {
             if (TryInsertInternal(key, value, out entry))
             {
                 return;
             }
 
-            if (add)
+            throw new ArgumentException($"Cant add duplicate key {key}");
+        }
+
+        protected virtual void ReplaceOrInsert(TKey key, TValue value)
+        {
+            if (TryInsertInternal(key, value, out int entry))
             {
-                throw new ArgumentException($"Cant add duplicate key {key}");
+                return;
             }
 
             ReplaceValueByEntry(ref entry, ref value);
@@ -803,17 +808,17 @@ namespace Fp.Collections
         {
             internal const int DictEntry = 1;
             internal const int KeyValuePair = 2;
-            private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
+            private readonly Map<TKey, TValue, TComparer> _map;
             private readonly int _getEnumeratorRetType; // What should Enumerator.Current return?
             private readonly int _version;
             private KeyValuePair<TKey, TValue> _current;
             private int _index;
 
-            internal Enumerator(Dictionary<TKey, TValue, TComparer> dictionary, int getEnumeratorRetType)
+            internal Enumerator(Map<TKey, TValue, TComparer> map, int getEnumeratorRetType)
             {
-                _dictionary = dictionary;
+                _map = map;
                 _index = 0;
-                _version = dictionary._version;
+                _version = map._version;
                 _getEnumeratorRetType = getEnumeratorRetType;
                 _current = new KeyValuePair<TKey, TValue>();
             }
@@ -821,7 +826,7 @@ namespace Fp.Collections
             public TKey CurrentKey => _current.Key;
             public TValue CurrentValue => _current.Value;
 
-            public ref TValue CurrentValueRef => ref _dictionary._entries[_index - 1].Value;
+            public ref TValue CurrentValueRef => ref _map._entries[_index - 1].Value;
 
 #region IDictionaryEnumerator Implementation
 
@@ -829,7 +834,7 @@ namespace Fp.Collections
             {
                 get
                 {
-                    if (_index == 0 || _index == _dictionary._count + 1)
+                    if (_index == 0 || _index == _map._count + 1)
                     {
                         throw new InvalidOperationException();
                     }
@@ -842,7 +847,7 @@ namespace Fp.Collections
             {
                 get
                 {
-                    if (_index == 0 || _index == _dictionary._count + 1)
+                    if (_index == 0 || _index == _map._count + 1)
                     {
                         throw new InvalidOperationException();
                     }
@@ -855,7 +860,7 @@ namespace Fp.Collections
             {
                 get
                 {
-                    if (_index == 0 || _index == _dictionary._count + 1)
+                    if (_index == 0 || _index == _map._count + 1)
                     {
                         throw new InvalidOperationException();
                     }
@@ -878,7 +883,7 @@ namespace Fp.Collections
             {
                 get
                 {
-                    if (_index == 0 || _index == _dictionary._count + 1)
+                    if (_index == 0 || _index == _map._count + 1)
                     {
                         throw new InvalidOperationException();
                     }
@@ -894,18 +899,18 @@ namespace Fp.Collections
 
             public bool MoveNext()
             {
-                if (_version != _dictionary._version)
+                if (_version != _map._version)
                 {
                     throw new InvalidOperationException("Failed version");
                 }
 
                 // Use unsigned comparison since we set index to dictionary.count+1 when the enumeration ends.
                 // dictionary.count+1 could be negative if dictionary.count is Int32.MaxValue
-                while ((uint) _index < (uint) _dictionary._count)
+                while ((uint) _index < (uint) _map._count)
                 {
-                    if (_dictionary._entries[_index].HashCode >= 0)
+                    if (_map._entries[_index].HashCode >= 0)
                     {
-                        _current = new KeyValuePair<TKey, TValue>(_dictionary._entries[_index].Key, _dictionary._entries[_index].Value);
+                        _current = new KeyValuePair<TKey, TValue>(_map._entries[_index].Key, _map._entries[_index].Value);
                         _index++;
                         return true;
                     }
@@ -913,14 +918,14 @@ namespace Fp.Collections
                     _index++;
                 }
 
-                _index = _dictionary._count + 1;
+                _index = _map._count + 1;
                 _current = new KeyValuePair<TKey, TValue>();
                 return false;
             }
 
             void IEnumerator.Reset()
             {
-                if (_version != _dictionary._version)
+                if (_version != _map._version)
                 {
                     throw new InvalidOperationException("Failed version");
                 }
@@ -942,18 +947,18 @@ namespace Fp.Collections
         [Serializable]
         public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
         {
-            private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
+            private readonly Map<TKey, TValue, TComparer> _map;
 
-            public KeyCollection(Dictionary<TKey, TValue, TComparer> dictionary)
+            public KeyCollection(Map<TKey, TValue, TComparer> map)
             {
-                _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+                _map = map ?? throw new ArgumentNullException(nameof(map));
             }
 
 #region ICollection Implementation
 
             bool ICollection.IsSynchronized => false;
 
-            object ICollection.SyncRoot => ((ICollection) _dictionary).SyncRoot;
+            object ICollection.SyncRoot => ((ICollection) _map).SyncRoot;
 
             void ICollection.CopyTo(Array array, int index)
             {
@@ -977,7 +982,7 @@ namespace Fp.Collections
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
 
-                if (array.Length - index < _dictionary.Count)
+                if (array.Length - index < _map.Count)
                 {
                     throw new ArgumentException("Arg_ArrayPlusOffTooSmall");
                 }
@@ -993,8 +998,8 @@ namespace Fp.Collections
                         throw new ArgumentException("Argument_InvalidArrayType");
                     }
 
-                    int count = _dictionary._count;
-                    Entry[] entries = _dictionary._entries;
+                    int count = _map._count;
+                    Entry[] entries = _map._entries;
                     try
                     {
                         for (var i = 0; i < count; i++)
@@ -1016,7 +1021,7 @@ namespace Fp.Collections
 
 #region ICollection<TKey> Implementation
 
-            public int Count => _dictionary.Count;
+            public int Count => _map.Count;
 
             bool ICollection<TKey>.IsReadOnly => true;
 
@@ -1032,13 +1037,13 @@ namespace Fp.Collections
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
 
-                if (array.Length - index < _dictionary.Count)
+                if (array.Length - index < _map.Count)
                 {
                     throw new ArgumentException("Arg_ArrayPlusOffTooSmall");
                 }
 
-                int count = _dictionary._count;
-                Entry[] entries = _dictionary._entries;
+                int count = _map._count;
+                Entry[] entries = _map._entries;
                 for (var i = 0; i < count; i++)
                 {
                     if (entries[i].HashCode >= 0)
@@ -1060,7 +1065,7 @@ namespace Fp.Collections
 
             bool ICollection<TKey>.Contains(TKey item)
             {
-                return _dictionary.ContainsKey(item);
+                return _map.ContainsKey(item);
             }
 
             bool ICollection<TKey>.Remove(TKey item)
@@ -1074,7 +1079,7 @@ namespace Fp.Collections
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return new Enumerator(_dictionary);
+                return new Enumerator(_map);
             }
 
 #endregion
@@ -1083,28 +1088,28 @@ namespace Fp.Collections
 
             IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
             {
-                return new Enumerator(_dictionary);
+                return new Enumerator(_map);
             }
 
 #endregion
 
             public Enumerator GetEnumerator()
             {
-                return new Enumerator(_dictionary);
+                return new Enumerator(_map);
             }
 
             [Serializable]
             public struct Enumerator : IEnumerator<TKey>
             {
-                private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
+                private readonly Map<TKey, TValue, TComparer> _map;
                 private readonly int _version;
                 private int _index;
 
-                internal Enumerator(Dictionary<TKey, TValue, TComparer> dictionary)
+                internal Enumerator(Map<TKey, TValue, TComparer> map)
                 {
-                    _dictionary = dictionary;
+                    _map = map;
                     _index = 0;
-                    _version = dictionary._version;
+                    _version = map._version;
                     Current = default;
                 }
 
@@ -1120,7 +1125,7 @@ namespace Fp.Collections
                 {
                     get
                     {
-                        if (_index == 0 || _index == _dictionary._count + 1)
+                        if (_index == 0 || _index == _map._count + 1)
                         {
                             throw new InvalidOperationException();
                         }
@@ -1131,16 +1136,16 @@ namespace Fp.Collections
 
                 public bool MoveNext()
                 {
-                    if (_version != _dictionary._version)
+                    if (_version != _map._version)
                     {
                         throw new InvalidOperationException("Failed version");
                     }
 
-                    while ((uint) _index < (uint) _dictionary._count)
+                    while ((uint) _index < (uint) _map._count)
                     {
-                        if (_dictionary._entries[_index].HashCode >= 0)
+                        if (_map._entries[_index].HashCode >= 0)
                         {
-                            Current = _dictionary._entries[_index].Key;
+                            Current = _map._entries[_index].Key;
                             _index++;
                             return true;
                         }
@@ -1148,14 +1153,14 @@ namespace Fp.Collections
                         _index++;
                     }
 
-                    _index = _dictionary._count + 1;
+                    _index = _map._count + 1;
                     Current = default;
                     return false;
                 }
 
                 void IEnumerator.Reset()
                 {
-                    if (_version != _dictionary._version)
+                    if (_version != _map._version)
                     {
                         throw new InvalidOperationException("Failed version");
                     }
@@ -1178,18 +1183,18 @@ namespace Fp.Collections
         [Serializable]
         public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
         {
-            private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
+            private readonly Map<TKey, TValue, TComparer> _map;
 
-            public ValueCollection(Dictionary<TKey, TValue, TComparer> dictionary)
+            public ValueCollection(Map<TKey, TValue, TComparer> map)
             {
-                _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+                _map = map ?? throw new ArgumentNullException(nameof(map));
             }
 
 #region ICollection Implementation
 
             bool ICollection.IsSynchronized => false;
 
-            object ICollection.SyncRoot => ((ICollection) _dictionary).SyncRoot;
+            object ICollection.SyncRoot => ((ICollection) _map).SyncRoot;
 
             void ICollection.CopyTo(Array array, int index)
             {
@@ -1213,7 +1218,7 @@ namespace Fp.Collections
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
 
-                if (array.Length - index < _dictionary.Count)
+                if (array.Length - index < _map.Count)
                 {
                     throw new ArgumentException("Arg_ArrayPlusOffTooSmall");
                 }
@@ -1229,8 +1234,8 @@ namespace Fp.Collections
                         throw new ArgumentException("Argument_InvalidArrayType");
                     }
 
-                    int count = _dictionary._count;
-                    Entry[] entries = _dictionary._entries;
+                    int count = _map._count;
+                    Entry[] entries = _map._entries;
                     try
                     {
                         for (var i = 0; i < count; i++)
@@ -1252,7 +1257,7 @@ namespace Fp.Collections
 
 #region ICollection<TValue> Implementation
 
-            public int Count => _dictionary.Count;
+            public int Count => _map.Count;
 
             bool ICollection<TValue>.IsReadOnly => true;
 
@@ -1268,13 +1273,13 @@ namespace Fp.Collections
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
 
-                if (array.Length - index < _dictionary.Count)
+                if (array.Length - index < _map.Count)
                 {
                     throw new ArgumentException("Arg_ArrayPlusOffTooSmall");
                 }
 
-                int count = _dictionary._count;
-                Entry[] entries = _dictionary._entries;
+                int count = _map._count;
+                Entry[] entries = _map._entries;
                 for (var i = 0; i < count; i++)
                 {
                     if (entries[i].HashCode >= 0)
@@ -1301,7 +1306,7 @@ namespace Fp.Collections
 
             bool ICollection<TValue>.Contains(TValue item)
             {
-                return _dictionary.ContainsValue(item);
+                return _map.ContainsValue(item);
             }
 
 #endregion
@@ -1310,7 +1315,7 @@ namespace Fp.Collections
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return new Enumerator(_dictionary);
+                return new Enumerator(_map);
             }
 
 #endregion
@@ -1319,28 +1324,28 @@ namespace Fp.Collections
 
             IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
             {
-                return new Enumerator(_dictionary);
+                return new Enumerator(_map);
             }
 
 #endregion
 
             public Enumerator GetEnumerator()
             {
-                return new Enumerator(_dictionary);
+                return new Enumerator(_map);
             }
 
             [Serializable]
             public struct Enumerator : IEnumerator<TValue>
             {
-                private readonly Dictionary<TKey, TValue, TComparer> _dictionary;
+                private readonly Map<TKey, TValue, TComparer> _map;
                 private readonly int _version;
                 private int _index;
 
-                internal Enumerator(Dictionary<TKey, TValue, TComparer> dictionary)
+                internal Enumerator(Map<TKey, TValue, TComparer> map)
                 {
-                    _dictionary = dictionary;
+                    _map = map;
                     _index = 0;
-                    _version = dictionary._version;
+                    _version = map._version;
                     Current = default;
                 }
 
@@ -1356,7 +1361,7 @@ namespace Fp.Collections
                 {
                     get
                     {
-                        if (_index == 0 || _index == _dictionary._count + 1)
+                        if (_index == 0 || _index == _map._count + 1)
                         {
                             throw new InvalidOperationException();
                         }
@@ -1367,16 +1372,16 @@ namespace Fp.Collections
 
                 public bool MoveNext()
                 {
-                    if (_version != _dictionary._version)
+                    if (_version != _map._version)
                     {
                         throw new InvalidOperationException("Failed version");
                     }
 
-                    while ((uint) _index < (uint) _dictionary._count)
+                    while ((uint) _index < (uint) _map._count)
                     {
-                        if (_dictionary._entries[_index].HashCode >= 0)
+                        if (_map._entries[_index].HashCode >= 0)
                         {
-                            Current = _dictionary._entries[_index].Value;
+                            Current = _map._entries[_index].Value;
                             _index++;
                             return true;
                         }
@@ -1384,14 +1389,14 @@ namespace Fp.Collections
                         _index++;
                     }
 
-                    _index = _dictionary._count + 1;
+                    _index = _map._count + 1;
                     Current = default;
                     return false;
                 }
 
                 void IEnumerator.Reset()
                 {
-                    if (_version != _dictionary._version)
+                    if (_version != _map._version)
                     {
                         throw new InvalidOperationException("Failed version");
                     }

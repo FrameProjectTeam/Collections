@@ -7,7 +7,7 @@ namespace Fp.Collection.Bench
 	{
 		public static void Main(string[] args)
 		{
-			Summary summary = BenchmarkRunner.Run<ClearBench>();
+			Summary summary = BenchmarkRunner.Run<ComparisonWithStdBench>();
 		}
 	}
 }

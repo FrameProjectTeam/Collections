@@ -252,6 +252,12 @@ namespace Fp.Collections
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T GetValue(int nodeIdx)
 		{
+			return GetValue(ref nodeIdx);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T GetValue(ref int nodeIdx)
+		{
 			return GetValueRef(ref nodeIdx);
 		}
 
@@ -432,18 +438,18 @@ namespace Fp.Collections
 			public int PreviousIdx;
 		}
 
-		public struct Enumerator : IEnumerator<T>, IEnumerator
+		public struct Enumerator : IEnumerator<T>
 		{
 			private readonly LinkedList<T> _list;
 			private readonly int _version;
 			private int _index;
+			private T _current;
 
 			public Enumerator(LinkedList<T> list)
 			{
 				_list = list;
 				_version = list._version;
-				_index = list.FirstIdx;
-				Current = default;
+				Reset(_list, out _current, out _index);
 			}
 
 #region IDisposable Implementation
@@ -457,7 +463,7 @@ namespace Fp.Collections
 
 #region IEnumerator Implementation
 
-			object IEnumerator.Current => Current;
+			object IEnumerator.Current => _current;
 
 			public bool MoveNext()
 			{
@@ -471,7 +477,7 @@ namespace Fp.Collections
 					return false;
 				}
 
-				Current = _list._values[_index];
+				_current = _list._values[_index];
 				_index = _list._entriesNext[_index];
 
 				return true;
@@ -479,15 +485,21 @@ namespace Fp.Collections
 
 			public void Reset()
 			{
-				Current = default;
-				_index = _list.FirstIdx;
+				Reset(_list, out _current, out _index);
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private static void Reset(IReadOnlyLinkedList<T> list, out T value, out int index)
+			{
+				value = default;
+				index = list.FirstIdx;
+			}
+			
 #endregion
 
 #region IEnumerator<T> Implementation
 
-			public T Current { get; private set; }
+			public T Current => _current;
 
 #endregion
 		}
