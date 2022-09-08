@@ -19,7 +19,7 @@ namespace Fp.Collections
 		) { }
 	}
 
-	public class Map<TKey, TValue, TComparer> : IDictionary, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+	public class Map<TKey, TValue, TComparer> : IMap<TKey, TValue, TComparer>
 		where TComparer : IEqualityComparer<TKey>
 	{
 		[NonSerialized]
@@ -79,25 +79,9 @@ namespace Fp.Collections
 			}
 		}
 
-		public TComparer Comparer { get; }
-
 		public KeyCollection Keys => _keys ??= new KeyCollection(this);
 
 		public ValueCollection Values => _values ??= new ValueCollection(this);
-
-		public TValue this[in TKey key]
-		{
-			get
-			{
-				if(TryGetValue(in key, out TValue value))
-				{
-					return value;
-				}
-
-				throw new KeyNotFoundException();
-			}
-			set => ReplaceOrInsert(key, value);
-		}
 
 #region ICollection Implementation
 
@@ -115,8 +99,6 @@ namespace Fp.Collections
 				return _syncRoot;
 			}
 		}
-
-		public int Count => _count - _freeCount;
 
 		void ICollection.CopyTo(Array array, int index)
 		{
@@ -379,25 +361,13 @@ namespace Fp.Collections
 
 #endregion
 
-#region IReadOnlyDictionary<TKey,TValue> Implementation
+#region IMap<TKey,TValue,TComparer> Implementation
 
-		IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => _keys ??= new KeyCollection(this);
-
-		IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _values ??= new ValueCollection(this);
-
-		bool IReadOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
-		{
-			return TryGetValue(in key, out value);
-		}
-
-		bool IReadOnlyDictionary<TKey, TValue>.ContainsKey(TKey key)
-		{
-			return ContainsKey(in key);
-		}
-
-		TValue IReadOnlyDictionary<TKey, TValue>.this[TKey key] => this[in key];
+		public TComparer Comparer { get; }
 
 #endregion
+
+#region IMap<TKey,TValue> Implementation
 
 		public int Add(in TKey key, TValue value)
 		{
@@ -410,35 +380,12 @@ namespace Fp.Collections
 			return TryInsert(in key, value, out _);
 		}
 
-		public bool ContainsKey(in TKey key)
-		{
-			return FindEntry(in key) >= 0;
-		}
-
 		public bool Remove(in TKey key)
 		{
 			return TryRemove(key, out _);
 		}
 
-		public bool TryGetValue(in TKey key, out TValue value, TValue failure = default)
-		{
-			return TryGetAndCast(in key, out value, failure);
-		}
-
-		public virtual bool TryGetAndCast<T>(in TKey key, out T value, T failure = default)
-		{
-			int i = FindEntry(key);
-			if(i >= 0 && _entries[i].Value is T val)
-			{
-				value = val;
-				return true;
-			}
-
-			value = failure;
-			return false;
-		}
-
-		public void SetDefaultValues(TValue value = default)
+		public void SetAllValuesTo(TValue value = default)
 		{
 			for(var i = 0; i < _entries.Length; i++)
 			{
@@ -498,6 +445,79 @@ namespace Fp.Collections
 			return false;
 		}
 
+		public TValue GetValueOrDefault(in TKey key)
+		{
+			int i = FindEntry(in key);
+			return i >= 0 ? _entries[i].Value : default;
+		}
+
+		public TValue this[in TKey key]
+		{
+			get
+			{
+				if(TryGetValue(in key, out TValue value))
+				{
+					return value;
+				}
+
+				throw new KeyNotFoundException();
+			}
+			set => ReplaceOrInsert(key, value);
+		}
+
+#endregion
+
+#region IReadOnlyCollection<KeyValuePair<TKey,TValue>> Implementation
+
+		public int Count => _count - _freeCount;
+
+#endregion
+
+#region IReadOnlyDictionary<TKey,TValue> Implementation
+
+		IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => _keys ??= new KeyCollection(this);
+
+		IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _values ??= new ValueCollection(this);
+
+		bool IReadOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
+		{
+			return TryGetValue(in key, out value);
+		}
+
+		bool IReadOnlyDictionary<TKey, TValue>.ContainsKey(TKey key)
+		{
+			return ContainsKey(in key);
+		}
+
+		TValue IReadOnlyDictionary<TKey, TValue>.this[TKey key] => this[in key];
+
+#endregion
+
+#region IReadOnlyMap<TKey,TValue> Implementation
+
+		public bool ContainsKey(in TKey key)
+		{
+			return FindEntry(in key) >= 0;
+		}
+
+		public bool TryGetValue(in TKey key, out TValue value, TValue failure = default)
+		{
+			return TryGetAndCast(in key, out value, failure);
+		}
+
+		public virtual bool TryGetAndCast<T>(in TKey key, out T value, T failure = default)
+		{
+			int i = FindEntry(key);
+			if(i >= 0 && _entries[i].Value is T val)
+			{
+				value = val;
+				return true;
+			}
+
+			value = failure;
+			return false;
+		}
+
 		public ref TValue GetValue(in TKey key)
 		{
 			int i = FindEntry(key);
@@ -541,17 +561,6 @@ namespace Fp.Collections
 			return false;
 		}
 
-		public Enumerator GetEnumerator()
-		{
-			return new Enumerator(this, Enumerator.KeyValuePair);
-		}
-
-		public TValue GetValueOrDefault(in TKey key)
-		{
-			int i = FindEntry(in key);
-			return i >= 0 ? _entries[i].Value : default;
-		}
-
 		public int FindEntry(in TKey key)
 		{
 			if(key == null)
@@ -575,6 +584,13 @@ namespace Fp.Collections
 			}
 
 			return -1;
+		}
+
+#endregion
+
+		public Enumerator GetEnumerator()
+		{
+			return new Enumerator(this, Enumerator.KeyValuePair);
 		}
 
 		protected void CopyTo<T>(T[] array, int index)
